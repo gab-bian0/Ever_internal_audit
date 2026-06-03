@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#16202e">
+<title>Audit Interno · Standard TOUR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<style>
+:root{
+  --bg:#0f1722; --panel:#16202e; --panel2:#1d2937; --line:#2a3a4d;
+  --ink:#eaf1f8; --ink-dim:#8da; --muted:#7f93a8;
+  --accent:#f6a823; --accent-d:#d98c0a;
+  --si:#1f9d55; --si-bg:#163a28; --si-line:#2bbf6c;
+  --no:#e0413a; --no-bg:#3b1a1a; --no-line:#ef5b54;
+  --na:#5b6b7d; --na-bg:#222e3c; --na-line:#7b8da0;
+  --card:#1a2533; --radius:14px;
+  --sat-top:env(safe-area-inset-top); --sat-bot:env(safe-area-inset-bottom);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;
+  -webkit-font-smoothing:antialiased;overscroll-behavior-y:none}
+body{padding-bottom:calc(96px + var(--sat-bot))}
+.mono{font-family:'IBM Plex Mono',monospace}
+.cond{font-family:'Saira Condensed',sans-serif}
+
+/* ── TOP BAR ── */
+header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#16202e 0%,#131c28 100%);
+  border-bottom:1px solid var(--line);padding:calc(var(--sat-top) + 10px) 16px 10px}
+.brand{display:flex;align-items:center;gap:11px}
+.logo{width:38px;height:38px;border-radius:9px;flex:none;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--accent),var(--accent-d));color:#16202e;
+  font-family:'Saira Condensed';font-weight:700;font-size:21px;box-shadow:0 2px 10px rgba(246,168,35,.25)}
+.brand h1{font-family:'Saira Condensed';font-weight:700;font-size:19px;letter-spacing:.3px;line-height:1}
+.brand p{font-size:10.5px;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin-top:3px}
+.prog-wrap{margin-top:11px;display:flex;align-items:center;gap:10px}
+.prog-track{flex:1;height:7px;border-radius:4px;background:#0c131c;overflow:hidden}
+.prog-bar{height:100%;width:0;border-radius:4px;background:linear-gradient(90deg,var(--accent),#ffd071);
+  transition:width .35s cubic-bezier(.4,0,.2,1)}
+.prog-txt{font-family:'IBM Plex Mono';font-size:12px;color:var(--accent);font-weight:600;flex:none}
+.save-dot{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:5px;margin-top:6px}
+.save-dot b{width:6px;height:6px;border-radius:50%;background:var(--si-line);display:inline-block}
+
+/* ── META ── */
+.meta{padding:14px 16px 4px}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fld{display:flex;flex-direction:column;gap:5px}
+.fld label{font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:600}
+.fld input{background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--ink);
+  padding:11px 12px;font-size:15px;font-family:inherit;width:100%}
+.fld input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(246,168,35,.13)}
+
+/* ── SECTION ── */
+.sections{padding:8px 12px 0}
+.sec{margin-bottom:10px;border-radius:var(--radius);overflow:hidden;background:var(--card);
+  border:1px solid var(--line)}
+.sec-head{display:flex;align-items:center;gap:11px;padding:14px 14px;cursor:pointer;
+  background:linear-gradient(180deg,#22354b,#1b2a3c);user-select:none}
+.sec-head .idx{font-family:'IBM Plex Mono';font-size:11px;font-weight:600;color:var(--accent);
+  background:rgba(246,168,35,.12);border:1px solid rgba(246,168,35,.25);border-radius:6px;
+  padding:3px 7px;flex:none}
+.sec-head .nm{flex:1;min-width:0}
+.sec-head .nm .a{font-family:'Saira Condensed';font-weight:700;font-size:16.5px;line-height:1.05;
+  letter-spacing:.3px;display:block}
+.sec-head .nm .s{font-size:11.5px;color:var(--accent);font-weight:600;margin-top:1px;letter-spacing:.3px}
+.sec-stat{font-family:'IBM Plex Mono';font-size:11px;color:var(--muted);flex:none;text-align:right;line-height:1.3}
+.sec-stat b{color:var(--si-line)}
+.chev{flex:none;width:22px;height:22px;transition:transform .25s;color:var(--muted)}
+.sec.open .chev{transform:rotate(180deg)}
+.sec-body{display:none;padding:6px 12px 14px}
+.sec.open .sec-body{display:block;animation:slidein .25s ease}
+@keyframes slidein{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+.resp{display:flex;flex-direction:column;gap:5px;margin:8px 2px 14px}
+.resp label{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:600}
+.resp input{background:var(--panel);border:1px solid var(--line);border-radius:9px;color:var(--ink);
+  padding:9px 11px;font-size:14px;font-family:inherit}
+.resp input:focus{outline:none;border-color:var(--accent)}
+
+/* ── QUESTION ── */
+.q{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 13px 12px;margin-bottom:10px;
+  transition:border-color .2s}
+.q[data-answered="SI"]{border-color:var(--si-line)}
+.q[data-answered="NO"]{border-color:var(--no-line)}
+.q[data-answered="N.A."]{border-color:var(--na-line)}
+.q-top{display:flex;gap:10px;margin-bottom:11px}
+.q-num{font-family:'IBM Plex Mono';font-weight:600;font-size:13px;color:#16202e;background:var(--accent);
+  border-radius:7px;min-width:26px;height:26px;display:grid;place-items:center;flex:none;padding:0 4px}
+.q-txt{font-size:13.5px;line-height:1.4;color:#dbe6f2;flex:1}
+.ans{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.ans button{font-family:'Saira Condensed';font-weight:700;font-size:16px;letter-spacing:1px;
+  padding:13px 0;border-radius:10px;border:1.5px solid var(--line);background:var(--panel2);
+  color:var(--muted);cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:2px}
+.ans button .ic{font-size:15px;line-height:1}
+.ans button:active{transform:scale(.96)}
+.ans button.sel[data-v="SI"]{background:var(--si-bg);border-color:var(--si-line);color:var(--si-line)}
+.ans button.sel[data-v="NO"]{background:var(--no-bg);border-color:var(--no-line);color:var(--no-line)}
+.ans button.sel[data-v="N.A."]{background:var(--na-bg);border-color:var(--na-line);color:var(--na-line)}
+
+.det-toggle{margin-top:10px;font-size:12px;color:var(--accent);font-weight:600;cursor:pointer;
+  display:inline-flex;align-items:center;gap:5px;user-select:none}
+.det-toggle .pl{font-size:14px;transition:transform .2s}
+.q.det-open .det-toggle .pl{transform:rotate(45deg)}
+.det{display:none;margin-top:11px;flex-direction:column;gap:9px;border-top:1px dashed var(--line);padding-top:11px}
+.q.det-open .det{display:flex}
+.det textarea,.det input,.det select{background:var(--panel2);border:1px solid var(--line);border-radius:9px;
+  color:var(--ink);padding:9px 11px;font-size:13.5px;font-family:inherit;width:100%}
+.det textarea{resize:vertical;min-height:54px}
+.det .dlbl{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600;margin-bottom:-4px}
+.det select:focus,.det input:focus,.det textarea:focus{outline:none;border-color:var(--accent)}
+
+/* ── PHOTOS ── */
+.det .photogrp{display:flex;flex-direction:column;gap:7px}
+.photos{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+.thumb{position:relative;width:76px;height:76px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#0c131c}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb-x{position:absolute;top:3px;right:3px;width:21px;height:21px;border-radius:50%;border:none;
+  background:rgba(8,12,18,.82);color:#fff;font-size:11px;line-height:1;cursor:pointer;display:grid;place-items:center;
+  backdrop-filter:blur(2px)}
+.thumb-x:active{transform:scale(.9)}
+.add-photo{width:76px;height:76px;border-radius:10px;border:1.5px dashed var(--accent);background:rgba(246,168,35,.07);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--accent);
+  font-size:10px;font-weight:600;cursor:pointer;letter-spacing:.3px;text-transform:uppercase}
+.add-photo svg{width:22px;height:22px}
+.add-photo:active{transform:scale(.96)}
+.photo-hint{font-size:10.5px;color:var(--muted);margin-top:1px}
+/* ── BOTTOM BAR ── */
+.bottombar{position:fixed;left:0;right:0;bottom:0;z-index:60;
+  background:linear-gradient(180deg,#16202e 0%,#0f1722 100%);border-top:1px solid var(--line);
+  padding:11px 14px calc(11px + var(--sat-bot));display:flex;gap:10px}
+.bottombar button{flex:1;font-family:'Saira Condensed';font-weight:700;font-size:16px;letter-spacing:.5px;
+  border:none;border-radius:12px;padding:15px 0;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;gap:8px;transition:transform .12s,filter .12s}
+.bottombar button:active{transform:scale(.97)}
+.btn-stat{background:var(--panel2);color:var(--ink);border:1px solid var(--line)!important;flex:.7}
+.btn-xls{background:linear-gradient(135deg,var(--si),#27b566);color:#fff;box-shadow:0 4px 16px rgba(31,157,85,.3)}
+.btn-xls:disabled{filter:grayscale(.7) brightness(.7);box-shadow:none}
+.bottombar svg{width:19px;height:19px}
+
+/* ── SHEET (stats) ── */
+.scrim{position:fixed;inset:0;z-index:80;background:rgba(6,11,18,.66);backdrop-filter:blur(3px);
+  display:none;align-items:flex-end}
+.scrim.show{display:flex;animation:fade .2s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{background:var(--bg);width:100%;max-height:88vh;border-radius:20px 20px 0 0;border-top:1px solid var(--line);
+  display:flex;flex-direction:column;animation:up .3s cubic-bezier(.2,.7,.2,1)}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+.sheet-grip{width:40px;height:4px;border-radius:3px;background:var(--line);margin:10px auto 4px}
+.sheet-h{padding:6px 18px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+.sheet-h h2{font-family:'Saira Condensed';font-weight:700;font-size:21px;letter-spacing:.4px}
+.sheet-x{background:var(--panel2);border:1px solid var(--line);color:var(--ink);width:34px;height:34px;
+  border-radius:9px;font-size:18px;cursor:pointer;line-height:1}
+.sheet-body{overflow-y:auto;padding:16px 16px calc(20px + var(--sat-bot));-webkit-overflow-scrolling:touch}
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:16px}
+.kpi-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px}
+.kpi-card .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:600}
+.kpi-card .val{font-family:'Saira Condensed';font-weight:700;font-size:34px;line-height:1;margin-top:7px}
+.kpi-card .sub{font-size:11px;color:var(--muted);margin-top:4px}
+.kpi-card.big{grid-column:1/-1;display:flex;align-items:center;gap:16px}
+.gauge{width:74px;height:74px;flex:none;position:relative}
+.gauge svg{transform:rotate(-90deg)}
+.gauge .gtxt{position:absolute;inset:0;display:grid;place-items:center;font-family:'Saira Condensed';
+  font-weight:700;font-size:20px}
+.judge{font-family:'Saira Condensed';font-weight:700;font-size:24px;letter-spacing:.5px}
+.srow{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--card);border:1px solid var(--line);
+  border-radius:11px;margin-bottom:8px}
+.srow .sn{flex:1;min-width:0}
+.srow .sn .t{font-size:13px;font-weight:600;line-height:1.2}
+.srow .sn .c{font-family:'IBM Plex Mono';font-size:10.5px;color:var(--muted);margin-top:3px}
+.srow .pc{font-family:'Saira Condensed';font-weight:700;font-size:20px;min-width:52px;text-align:right}
+.mini{width:46px;height:6px;border-radius:3px;background:#0c131c;overflow:hidden;flex:none}
+.mini i{display:block;height:100%;border-radius:3px}
+.empty{text-align:center;color:var(--muted);padding:30px 10px;font-size:13px}
+
+.toast{position:fixed;bottom:calc(110px + var(--sat-bot));left:50%;transform:translateX(-50%) translateY(20px);
+  background:#0a0f16;border:1px solid var(--si-line);color:var(--ink);padding:12px 18px;border-radius:11px;
+  font-size:13.5px;font-weight:500;z-index:100;opacity:0;pointer-events:none;transition:all .3s;
+  box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:90%;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{border-color:var(--no-line)}
+
+.foot{text-align:center;padding:18px 20px 6px;color:var(--muted);font-size:10.5px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">AI</div>
+    <div>
+      <h1>AUDIT INTERNO</h1>
+      <p>Standard TOUR · M 8.2-04 · Rev. 05</p>
+    </div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-track"><div class="prog-bar" id="progBar"></div></div>
+    <div class="prog-txt" id="progTxt">0/0</div>
+  </div>
+  <div class="save-dot"><b></b><span id="saveTxt">salvataggio automatico sul dispositivo</span></div>
+</header>
+
+<div class="meta">
+  <div class="meta-grid">
+    <div class="fld">
+      <label>Data audit</label>
+      <input type="date" id="metaData">
+    </div>
+    <div class="fld">
+      <label>Valutatore</label>
+      <input type="text" id="metaValutatore" placeholder="Nome e cognome" autocomplete="off">
+    </div>
+  </div>
+</div>
+
+<div class="sections" id="sections"></div>
+
+<div class="foot">
+  I dati restano sul tuo telefono finché non generi il file.<br>
+  Genera l'Excel a fine giro per archiviarlo o inviarlo.
+</div>
+
+<div class="bottombar">
+  <button class="btn-stat" id="btnStat">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6"/><rect x="12" y="7" width="3" height="10"/><rect x="17" y="13" width="3" height="4"/></svg>
+    Statistiche
+  </button>
+  <button class="btn-xls" id="btnXls">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 13 6 5M15 13l-6 5"/></svg>
+    Genera Excel
+  </button>
+</div>
+
+<div class="scrim" id="scrim">
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-h">
+      <h2>Riepilogo audit</h2>
+      <button class="sheet-x" id="sheetX">✕</button>
+    </div>
+    <div class="sheet-body" id="statBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ════════ DATA MODEL ════════ */
+const MAG_Q = [
+  [1,"Viene rispettato e mantenuto ordine e pulizia per evitare possibili inquinamenti?"],
+  [2,"Le materie prime presentano il cartellino identificativo QRcode?"],
+  [3,"Viene rispettata la gestione FIFO dei materiali?"],
+  [4,"Le rimanenze dei prodotti parzialmente dosati conservano la loro identificazione QR code?"],
+];
+const PROD_Q = [
+  [18,"Vengono controllate le pesate per mezzo della pistola ottica, del nastro pesatore e registrate al by?"],
+  [19,"Gli ingredienti predosati presenti in plancia sono preparati in modo adeguato in contenitori puliti al by?"],
+  [20,"Piatto mescolatore, spalle e blender dei mescolatori aperti sono puliti ed esenti da residui di gomma che possano inquinare la mescola in produzione?"],
+  [21,"Al mescolatore aperto (specificare quale/i) vengono rispettate le specifiche di lavorazione presenti nel programma di produzione giornaliero?"],
+  [22,"Batch off – fine linea; sono rispettate le specifiche di imballo previste dal programma di produzione?"],
+  [23,"Ordine e pulizia vengono rispettati?"],
+];
+const SECTIONS = [
+  {id:"mag_trad", area:"MAGAZZINO", sub:"Tradizionale", q:MAG_Q},
+  {id:"mag_dayco",area:"MAGAZZINO", sub:"Dayco",        q:MAG_Q},
+  {id:"mag_vers", area:"MAGAZZINO", sub:"Versalis",     q:MAG_Q},
+  {id:"mag_sagom",area:"MAGAZZINO", sub:"Ex Sagom",     q:MAG_Q},
+  {id:"mag_est",  area:"MAGAZZINO ESTERNO", sub:"", q:[
+    [5,"Viene rispettato e mantenuto ordine e pulizia per evitare possibili inquinamenti?"],
+    [6,"Viene rispettata la gestione FIFO dei materiali?"]]},
+  {id:"camera",   area:"CAMERA CALDA", sub:"", q:[
+    [7,"Viene rispettato e mantenuto ordine e pulizia per evitare possibili inquinamenti?"]]},
+  {id:"dos_man",  area:"DOSATURA MANUALE", sub:"", q:[
+    [8,"Viene rispettato e mantenuto ordine e pulizia per evitare possibili inquinamenti?"],
+    [9,"Le materie prime stoccate presentano tutte il cartellino QRcode?"],
+    [10,"L'operatore presente effettuava la lettura con la pistola QRcode del cartellino identificativo?"]]},
+  {id:"cs1",      area:"DOSATURA AUTOMATICA", sub:"Color Service N. 1", q:[
+    [11,"Ordine e pulizia vengono rispettati?"],
+    [12,"In area color service 1 i bancali sono identificati con l'etichetta QR code?"]]},
+  {id:"cs234",    area:"DOSATURA AUTOMATICA", sub:"Color Service N. 2, 3 e 4", q:[
+    [13,"Ordine e pulizia vengono rispettati?"]]},
+  {id:"est_off",  area:"ESTERNO EX OFFICINA", sub:"", q:[
+    [14,"Ordine e pulizia vengono rispettati?"],
+    [15,"I materiali in transito sono opportunamente identificati?"]]},
+  {id:"dos_gomma",area:"DOSATURA GOMMA", sub:"", q:[
+    [16,"Ordine e pulizia vengono rispettati?"],
+    [17,"I cartellini QRcode sono presenti nei bancali predisposti per le pesate? Nel cartellino identificativo della pesata risulta stampato il lotto del polimero impiegato?"]]},
+  {id:"prod_gk250b",area:"PRODUZIONE", sub:"Linea GK250B", q:PROD_Q},
+  {id:"prod_gk135", area:"PRODUZIONE", sub:"Linea GK135",  q:PROD_Q},
+  {id:"prod_ngk3",  area:"PRODUZIONE", sub:"Linea NGK3",   q:PROD_Q},
+  {id:"prod_gk250n",area:"PRODUZIONE", sub:"Linea GK250N", q:PROD_Q},
+  {id:"lab_cq",   area:"LABORATORIO CQ", sub:"", q:[
+    [24,"Ordine e pulizia vengono rispettati?"],
+    [25,"Il piano di controllo previsto per le mescole in produzione viene rispettato?"],
+    [26,"In caso di mescola non conforme o in attesa di benestare viene identificata opportunamente con bollini rossi o blu?"],
+    [27,"In caso di mescola non conforme viene caricata sul programma di interscambio dedicato laboratorio/logistica/produzione/qualità?"]]},
+  {id:"lab_rs",   area:"LABORATORIO R&S", sub:"", q:[
+    [28,"Ordine e pulizia vengono rispettati?"],
+    [29,"Le strumentazioni non in uso sono spente/messe in stand-by?"]]},
+  {id:"sped",     area:"SPEDIZIONE MESCOLE", sub:"", q:[
+    [30,"Ordine e pulizia vengono rispettati?"],
+    [31,"I bancali contenenti le mescole in spedizione sono integri?"],
+    [32,"Sono presenti mescole pronte per la spedizione con data di produzione non antecedente di una settimana?"]]},
+  {id:"nc",       area:"MESCOLE NON CONFORMI", sub:"", q:[
+    [33,"I bancali di mescole non conformi sono isolati nell'area NC o nei drive inn dedicati?"],
+    [34,"Le mescole identificate come non conformi hanno il modulo identificativo per il trattamento della non conformità?"]]},
+];
+const STATUS_OPTS = ["", "Aperto", "In corso", "Chiuso"];
+
+/* ════════ STATE + STORAGE ════════ */
+const SKEY = "audit_tour_v1";
+let STATE = { meta:{data:"", valutatore:""}, resp:{}, ans:{} };
+let storageOK = true;
+function load(){
+  try{ const raw = localStorage.getItem(SKEY); if(raw) STATE = JSON.parse(raw); }
+  catch(e){ storageOK=false; }
+}
+let quotaWarned=false;
+function save(){
+  try{ localStorage.setItem(SKEY, JSON.stringify(STATE)); return true; }
+  catch(e){
+    const quota = e && (e.name==='QuotaExceededError' || /quota/i.test(e.name||e.message||''));
+    if(quota){
+      if(!quotaWarned){ quotaWarned=true; toast('Memoria piena: le foto restano valide per questa sessione e nell\'Excel, ma riduci le foto o genera il file', true); }
+      document.getElementById('saveTxt').textContent='memoria piena · genera l\'Excel per non perdere i dati';
+    } else {
+      storageOK=false; document.getElementById('saveTxt').textContent='memoria non disponibile in anteprima';
+    }
+    return false;
+  }
+}
+function qkey(sec, n){ return sec+"#"+n; }
+
+/* ════════ RENDER ════════ */
+const TOTAL_Q = SECTIONS.reduce((a,s)=>a+s.q.length,0);
+function build(){
+  const root = document.getElementById('sections');
+  SECTIONS.forEach((sec, si)=>{
+    const el = document.createElement('div');
+    el.className = 'sec'; el.id = 'sec_'+sec.id;
+    const subHtml = sec.sub ? `<span class="s">${sec.sub}</span>` : '';
+    let qsHtml = '';
+    sec.q.forEach(([n,t])=>{
+      const k = qkey(sec.id,n);
+      const a = STATE.ans[k] || {};
+      const sel = a.answer||'';
+      const detOpen = (a.note||a.intervento||a.data||a.status||(a.photos&&a.photos.length)) ? ' det-open':'';
+      qsHtml += `
+      <div class="q${detOpen}" id="q_${k}" data-answered="${sel}">
+        <div class="q-top"><div class="q-num">${n}</div><div class="q-txt">${t}</div></div>
+        <div class="ans" data-k="${k}">
+          <button data-v="SI" class="${sel==='SI'?'sel':''}"><span class="ic">✓</span>SI</button>
+          <button data-v="NO" class="${sel==='NO'?'sel':''}"><span class="ic">✕</span>NO</button>
+          <button data-v="N.A." class="${sel==='N.A.'?'sel':''}"><span class="ic">—</span>N.A.</button>
+        </div>
+        <div class="det-toggle" data-k="${k}"><span class="pl">+</span> Dettagli (note, foto, intervento, status)</div>
+        <div class="det">
+          <div><div class="dlbl">Note</div>
+            <textarea data-k="${k}" data-f="note" placeholder="Annotazioni, descrizione della rilevazione…">${esc(a.note)}</textarea></div>
+          <div class="photogrp"><div class="dlbl">Foto evidenze / non conformità</div>
+            <div class="photos" data-photos="${k}">${photosHtml(k)}</div>
+            <div class="photo-hint">Tocca “Foto” per scattare con la fotocamera o scegliere dalla galleria.</div></div>
+          <div><div class="dlbl">Intervento e responsabile</div>
+            <input type="text" data-k="${k}" data-f="intervento" value="${esc(a.intervento)}" placeholder="Azione + responsabile"></div>
+          <div><div class="dlbl">Data attuazione</div>
+            <input type="date" data-k="${k}" data-f="data" value="${esc(a.data)}"></div>
+          <div><div class="dlbl">Status</div>
+            <select data-k="${k}" data-f="status">${STATUS_OPTS.map(o=>`<option value="${o}" ${a.status===o?'selected':''}>${o||'—'}</option>`).join('')}</select></div>
+        </div>
+      </div>`;
+    });
+    const respHtml = `
+      <div class="resp">
+        <label>Responsabile presente</label>
+        <input type="text" data-resp="${sec.id}" value="${esc(STATE.resp[sec.id])}" placeholder="Nome responsabile dell'area">
+      </div>`;
+    el.innerHTML = `
+      <div class="sec-head" data-sec="${sec.id}">
+        <div class="idx">${String(si+1).padStart(2,'0')}</div>
+        <div class="nm"><span class="a cond">${sec.area}</span>${subHtml}</div>
+        <div class="sec-stat" id="ss_${sec.id}"></div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <div class="sec-body">${respHtml}${qsHtml}</div>`;
+    root.appendChild(el);
+  });
+}
+function esc(s){ return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function photosHtml(k){
+  const ph=(STATE.ans[k]&&STATE.ans[k].photos)||[];
+  const thumbs = ph.map((p,pi)=>`<div class="thumb"><img src="${p.data}" alt="foto ${pi+1}"><button class="thumb-x" data-delphoto="${k}" data-pi="${pi}" aria-label="Rimuovi foto">✕</button></div>`).join('');
+  const add = `<label class="add-photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3.2"/></svg>Foto<input type="file" accept="image/*" capture="environment" data-addphoto="${k}" hidden></label>`;
+  return thumbs + add;
+}
+function renderPhotos(k){
+  const cont=document.querySelector(`.photos[data-photos="${k}"]`);
+  if(cont) cont.innerHTML=photosHtml(k);
+}
+function compressImage(file, maxDim, quality){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onerror=()=>reject(new Error('lettura file'));
+    reader.onload=()=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error('immagine non valida'));
+      img.onload=()=>{
+        let w=img.naturalWidth, h=img.naturalHeight;
+        if(w>=h && w>maxDim){ h=Math.round(h*maxDim/w); w=maxDim; }
+        else if(h>w && h>maxDim){ w=Math.round(w*maxDim/h); h=maxDim; }
+        else if(w===h && w>maxDim){ w=maxDim; h=maxDim; }
+        const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+        const ctx=cv.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h);
+        ctx.drawImage(img,0,0,w,h);
+        resolve({ data: cv.toDataURL('image/jpeg', quality), w, h });
+      };
+      img.src=reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+async function handleAddPhoto(input){
+  const k=input.dataset.addphoto;
+  const files=Array.from(input.files||[]);
+  if(!files.length) return;
+  toast(files.length>1?`Elaboro ${files.length} foto…`:'Elaboro la foto…');
+  STATE.ans[k]=STATE.ans[k]||{};
+  STATE.ans[k].photos=STATE.ans[k].photos||[];
+  for(const file of files){
+    try{
+      const img=await compressImage(file, 1100, 0.62);
+      STATE.ans[k].photos.push(img);
+    }catch(e){ toast('Foto non caricata: '+e.message, true); }
+  }
+  input.value='';
+  const okSave=save();
+  renderPhotos(k);
+  const q=document.getElementById('q_'+k); if(q) q.classList.add('det-open');
+  if(okSave) toast('Foto aggiunta');
+}
+function deletePhoto(k, pi){
+  if(STATE.ans[k]&&STATE.ans[k].photos){
+    STATE.ans[k].photos.splice(pi,1);
+    if(!STATE.ans[k].photos.length) delete STATE.ans[k].photos;
+    save(); renderPhotos(k);
+  }
+}
+
+/* ════════ INTERACTIONS ════════ */
+function wire(){
+  document.getElementById('metaData').value = STATE.meta.data||'';
+  document.getElementById('metaValutatore').value = STATE.meta.valutatore||'';
+  document.getElementById('metaData').addEventListener('change',e=>{STATE.meta.data=e.target.value;save();});
+  document.getElementById('metaValutatore').addEventListener('input',e=>{STATE.meta.valutatore=e.target.value;save();});
+
+  document.getElementById('sections').addEventListener('click', e=>{
+    const head = e.target.closest('.sec-head');
+    if(head){ document.getElementById('sec_'+head.dataset.sec).classList.toggle('open'); return; }
+    const ansBtn = e.target.closest('.ans button');
+    if(ansBtn){
+      const k = ansBtn.parentElement.dataset.k;
+      const v = ansBtn.dataset.v;
+      STATE.ans[k] = STATE.ans[k]||{};
+      STATE.ans[k].answer = (STATE.ans[k].answer===v)? '' : v;
+      const grp = ansBtn.parentElement;
+      grp.querySelectorAll('button').forEach(b=>b.classList.toggle('sel', b.dataset.v===STATE.ans[k].answer && STATE.ans[k].answer!==''));
+      document.getElementById('q_'+k).dataset.answered = STATE.ans[k].answer||'';
+      save(); refreshStats();
+      return;
+    }
+    const dt = e.target.closest('.det-toggle');
+    if(dt){ document.getElementById('q_'+dt.dataset.k).classList.toggle('det-open'); return; }
+    const delp = e.target.closest('.thumb-x');
+    if(delp){ deletePhoto(delp.dataset.delphoto, parseInt(delp.dataset.pi,10)); return; }
+  });
+
+  document.getElementById('sections').addEventListener('input', e=>{
+    const t = e.target;
+    if(t.dataset.resp!==undefined){ STATE.resp[t.dataset.resp]=t.value; save(); return; }
+    if(t.dataset.k!==undefined && t.dataset.f){
+      STATE.ans[t.dataset.k]=STATE.ans[t.dataset.k]||{};
+      STATE.ans[t.dataset.k][t.dataset.f]=t.value; save();
+    }
+  });
+  document.getElementById('sections').addEventListener('change', e=>{
+    const t=e.target;
+    if(t.dataset.addphoto!==undefined){ handleAddPhoto(t); return; }
+    if(t.dataset.k!==undefined && t.dataset.f==='status'){
+      STATE.ans[t.dataset.k]=STATE.ans[t.dataset.k]||{};
+      STATE.ans[t.dataset.k].status=t.value; save();
+    }
+  });
+
+  document.getElementById('btnStat').addEventListener('click',openStats);
+  document.getElementById('sheetX').addEventListener('click',closeStats);
+  document.getElementById('scrim').addEventListener('click',e=>{ if(e.target.id==='scrim') closeStats(); });
+  document.getElementById('btnXls').addEventListener('click',exportExcel);
+}
+
+/* ════════ STATS ════════ */
+function computeSec(sec){
+  let si=0,no=0,na=0,blank=0;
+  sec.q.forEach(([n])=>{
+    const a=(STATE.ans[qkey(sec.id,n)]||{}).answer;
+    if(a==='SI')si++; else if(a==='NO')no++; else if(a==='N.A.')na++; else blank++;
+  });
+  const tot=si+no;
+  const pct = tot>0 ? si/tot : null;
+  return {si,no,na,blank,tot,pct,count:sec.q.length};
+}
+function answeredCount(){
+  let c=0; SECTIONS.forEach(s=>s.q.forEach(([n])=>{ if((STATE.ans[qkey(s.id,n)]||{}).answer) c++; })); return c;
+}
+function judge(pct){
+  if(pct===null) return ['—','var(--muted)'];
+  if(pct>=0.8) return ['OTTIMO','var(--si-line)'];
+  if(pct>=0.5) return ['SUFFICIENTE','var(--accent)'];
+  return ['CRITICO','var(--no-line)'];
+}
+function pctColor(pct){ if(pct===null)return 'var(--na-line)'; if(pct>=0.8)return 'var(--si-line)'; if(pct>=0.5)return 'var(--accent)'; return 'var(--no-line)'; }
+
+function refreshStats(){
+  const ans=answeredCount();
+  document.getElementById('progTxt').textContent=ans+'/'+TOTAL_Q;
+  document.getElementById('progBar').style.width=(TOTAL_Q? ans/TOTAL_Q*100:0)+'%';
+  document.getElementById('btnXls').disabled = ans===0;
+  SECTIONS.forEach(sec=>{
+    const s=computeSec(sec);
+    const elS=document.getElementById('ss_'+sec.id);
+    if(elS){
+      if(s.si+s.no+s.na===0){ elS.innerHTML=`<span style="color:var(--muted)">0/${s.count}</span>`; }
+      else { elS.innerHTML=`<b>${s.si}</b>·${s.no}·${s.na}<br><span style="color:var(--muted)">${s.si+s.no+s.na}/${s.count}</span>`; }
+    }
+  });
+}
+
+function openStats(){
+  const body=document.getElementById('statBody');
+  let totSi=0,totNo=0,totNa=0;
+  const rows=[];
+  SECTIONS.forEach((sec,i)=>{
+    const s=computeSec(sec); totSi+=s.si; totNo+=s.no; totNa+=s.na;
+    const [j,c]=judge(s.pct);
+    const pcTxt = s.pct===null?'—':Math.round(s.pct*100)+'%';
+    const name = sec.area + (sec.sub?(' · '+sec.sub):'');
+    rows.push(`
+      <div class="srow">
+        <div class="mini"><i style="width:${s.pct===null?0:s.pct*100}%;background:${pctColor(s.pct)}"></i></div>
+        <div class="sn"><div class="t">${name}</div><div class="c">SI ${s.si} · NO ${s.no} · N.A. ${s.na} · risposte ${s.si+s.no+s.na}/${s.count}</div></div>
+        <div class="pc" style="color:${pctColor(s.pct)}">${pcTxt}</div>
+      </div>`);
+  });
+  const grandTot=totSi+totNo;
+  const grandPct = grandTot>0? totSi/grandTot : null;
+  const [gj,gc]=judge(grandPct);
+  const gpv = grandPct===null?0:grandPct;
+  const circ=2*Math.PI*30, off=circ*(1-gpv);
+  const ans=answeredCount();
+  let head;
+  if(ans===0){
+    head=`<div class="empty">Nessuna risposta ancora registrata.<br>Compila almeno una domanda per vedere le statistiche.</div>`;
+  } else {
+    head=`
+    <div class="kpi">
+      <div class="kpi-card big">
+        <div class="gauge">
+          <svg width="74" height="74" viewBox="0 0 74 74">
+            <circle cx="37" cy="37" r="30" fill="none" stroke="#0c131c" stroke-width="8"/>
+            <circle cx="37" cy="37" r="30" fill="none" stroke="${gc}" stroke-width="8" stroke-linecap="round"
+              stroke-dasharray="${circ}" stroke-dashoffset="${off}"/>
+          </svg>
+          <div class="gtxt" style="color:${gc}">${grandPct===null?'—':Math.round(grandPct*100)+'%'}</div>
+        </div>
+        <div>
+          <div class="lbl">Giudizio complessivo</div>
+          <div class="judge" style="color:${gc}">${gj}</div>
+          <div class="sub">${ans} di ${TOTAL_Q} domande compilate</div>
+        </div>
+      </div>
+      <div class="kpi-card"><div class="lbl">Conformi (SI)</div><div class="val" style="color:var(--si-line)">${totSi}</div><div class="sub">risposte positive</div></div>
+      <div class="kpi-card"><div class="lbl">Non conformi (NO)</div><div class="val" style="color:var(--no-line)">${totNo}</div><div class="sub">${totNa} non applicabili</div></div>
+    </div>
+    <div class="lbl" style="font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:600;margin:4px 2px 10px">Dettaglio per area</div>`;
+  }
+  body.innerHTML = head + rows.join('');
+  document.getElementById('scrim').classList.add('show');
+}
+function closeStats(){ document.getElementById('scrim').classList.remove('show'); }
+
+/* ════════ TOAST ════════ */
+let toastT;
+function toast(msg, err){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.toggle('err',!!err); t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+/* ════════ EXCEL EXPORT (ExcelJS) ════════ */
+const HEX = {
+  title:'FF1F3864', area:'FF2E75B6', fg:'FFFFFFFF', hdr:'FF41719C',
+  alt:'FFEEF4FB', white:'FFFFFFFF', si:'FFC6EFCE', no:'FFFFC7CE',
+  sumhdr:'FF1F3864', sumrow:'FFE2EFDA', siTxt:'FF1F6B3A', noTxt:'FF9C1B16'
+};
+function thin(){ const s={style:'thin',color:{argb:'FFBFBFBF'}}; return {top:s,left:s,bottom:s,right:s}; }
+function ansFill(v){
+  if(v==='SI') return {type:'pattern',pattern:'solid',fgColor:{argb:HEX.si}};
+  if(v==='NO') return {type:'pattern',pattern:'solid',fgColor:{argb:HEX.no}};
+  return null;
+}
+
+async function exportExcel(){
+  if(answeredCount()===0){ toast('Compila almeno una domanda',true); return; }
+  if(typeof ExcelJS==='undefined'){ toast('Libreria Excel non caricata, riprova online',true); return; }
+  toast('Genero il file…');
+  try{
+    const wb=new ExcelJS.Workbook();
+    const ws=wb.addWorksheet('Checklist Audit',{views:[{state:'frozen',ySplit:4}]});
+    ws.columns=[{width:5},{width:75},{width:12},{width:35},{width:28},{width:16},{width:12}];
+
+    const F=(o)=>({name:'Calibri',...o});
+    function setRow(rowIdx,h){ ws.getRow(rowIdx).height=h; }
+
+    // ROW 1 title
+    ws.mergeCells('A1:G1');
+    let c=ws.getCell('A1'); c.value='AUDIT INTERNO - Standard TOUR';
+    c.font=F({bold:true,color:{argb:HEX.fg},size:14}); c.fill={type:'pattern',pattern:'solid',fgColor:{argb:HEX.title}};
+    c.alignment={horizontal:'center',vertical:'middle'}; setRow(1,30);
+    // ROW 2 subtitle
+    ws.mergeCells('A2:E2');
+    c=ws.getCell('A2'); c.value='MACRO - AREE MAGAZZINO MP - DOSATURA - PRODUZIONE - LABORATORIO';
+    c.font=F({bold:true,color:{argb:HEX.fg},size:10}); c.fill={type:'pattern',pattern:'solid',fgColor:{argb:HEX.title}};
+    c.alignment={horizontal:'center',vertical:'middle'};
+    ws.mergeCells('F2:G2'); c=ws.getCell('F2'); c.value='M 8.2-04 | Rev. 05 | 04/05/2026';
+    c.font=F({color:{argb:HEX.fg},size:9}); c.fill={type:'pattern',pattern:'solid',fgColor:{argb:HEX.title}};
+    c.alignment={horizontal:'right',vertical:'middle'}; setRow(2,22);
+    // ROW 3 meta
+    c=ws.getCell('A3'); c.value='Data:'; c.font=F({bold:true,size:10});
+    ws.mergeCells('B3:C3'); c=ws.getCell('B3'); c.value=fmtDate(STATE.meta.data); c.font=F({size:10}); c.border={bottom:{style:'thin'}};
+    c=ws.getCell('D3'); c.value='Valutatore:'; c.font=F({bold:true,size:10});
+    ws.mergeCells('E3:G3'); c=ws.getCell('E3'); c.value=STATE.meta.valutatore||''; c.font=F({size:10}); c.border={bottom:{style:'thin'}};
+    setRow(3,22);
+    // ROW 4 headers
+    const heads=['N°','Domanda / Verifica','Risposta','Note / Evidenze Fotografiche','Intervento e Responsabile','Data Attuazione','Status'];
+    heads.forEach((h,i)=>{ const cc=ws.getCell(4,i+1); cc.value=h; cc.font=F({bold:true,color:{argb:HEX.fg},size:9});
+      cc.fill={type:'pattern',pattern:'solid',fgColor:{argb:HEX.hdr}}; cc.alignment={horizontal:'center',vertical:'middle',wrapText:true}; cc.border=thin(); });
+    setRow(4,28);
+
+    let r=5;
+    const ranges={}; // secId -> {name, start, end}
+    SECTIONS.forEach(sec=>{
+      // area header
+      ws.mergeCells(`A${r}:B${r}`);
+      const nm = sec.area + (sec.sub? (' - '+sec.sub):'');
+      c=ws.getCell(`A${r}`); c.value='  '+nm; c.font=F({bold:true,color:{argb:HEX.fg},size:10});
+      c.fill={type:'pattern',pattern:'solid',fgColor:{argb:HEX.area}}; c.alignment={horizontal:'left',vertical:'middle'};
+      ws.mergeCells(`C${r}:G${r}`);
+      c=ws.getCell(`C${r}`); const resp=STATE.resp[sec.id]||'';
+      c.value='  RESPONSABILE PRESENTE: '+(resp||'___________________________');
+      c.font=F({italic:true,color:{argb:HEX.fg},size:9}); c.fill={type:'pattern',pattern:'solid',fgColor:{argb:HEX.area}};
+      c.alignment={horizontal:'left',vertical:'middle'};
+      setRow(r,22); r++;
+      const start=r;
+      sec.q.forEach(([n,t],i)=>{
+        const a=STATE.ans[qkey(sec.id,n)]||{};
+        const photos=(a.photos||[]);
+        const nPh=photos.length;
+        const va = nPh? 'top' : 'middle';
+        const bg = (i%2===1)? HEX.alt : HEX.white;
+        const bgFill={type:'pattern',pattern:'solid',fgColor:{argb:bg}};
+        // N°
+        c=ws.getCell(r,1); c.value=n; c.font=F({bold:true,size:9}); c.fill=bgFill;
+        c.alignment={horizontal:'center',vertical:va}; c.border=thin();
+        // Domanda
+        c=ws.getCell(r,2); c.value=t; c.font=F({size:9}); c.fill=bgFill;
+        c.alignment={horizontal:'left',vertical:va,wrapText:true}; c.border=thin();
+        // Risposta
+        c=ws.getCell(r,3); c.value=a.answer||''; c.font=F({size:10,bold:true,
+          color:{argb: a.answer==='SI'?HEX.siTxt : a.answer==='NO'?HEX.noTxt : 'FF000000'}});
+        const af=ansFill(a.answer); c.fill= af||bgFill;
+        c.alignment={horizontal:'center',vertical:va}; c.border=thin();
+        c.dataValidation={type:'list',allowBlank:true,formulae:['"SI,NO,N.A."']};
+        // Note (con eventuale marker se piu di 4 foto)
+        let noteVal=a.note||'';
+        if(nPh>4){ noteVal=(noteVal?noteVal+'\n':'')+'(+ '+(nPh-4)+' altre foto nell\'app)'; }
+        c=ws.getCell(r,4); c.value=noteVal; c.font=F({size:9}); c.fill=bgFill;
+        c.alignment={horizontal:'left',vertical:va,wrapText:true}; c.border=thin();
+        // Intervento
+        c=ws.getCell(r,5); c.value=a.intervento||''; c.font=F({size:9}); c.fill=bgFill;
+        c.alignment={horizontal:'left',vertical:va,wrapText:true}; c.border=thin();
+        // Data
+        c=ws.getCell(r,6); c.value=fmtDate(a.data); c.font=F({size:9}); c.fill=bgFill;
+        c.alignment={horizontal:'center',vertical:va}; c.border=thin();
+        // Status
+        c=ws.getCell(r,7); c.value=a.status||''; c.font=F({size:9}); c.fill=bgFill;
+        c.alignment={horizontal:'center',vertical:va}; c.border=thin();
+        // Foto: striscia nella parte bassa della riga (colonne D-G), max 4 visibili
+        if(nPh){
+          const TW=96, TH=72;
+          photos.slice(0,4).forEach((p,pi)=>{
+            try{
+              const b64=(p.data.split(',')[1])||p.data;
+              const imgId=wb.addImage({base64:b64, extension:'jpeg'});
+              ws.addImage(imgId, { tl:{ col: 3+pi+0.04, row: (r-1)+0.34 }, ext:{ width:TW, height:TH }, editAs:'oneCell' });
+            }catch(e){ /* ignora singola foto non valida */ }
+          });
+          setRow(r, 118);
+        } else {
+          setRow(r,36);
+        }
+        r++;
+      });
+      ranges[sec.id]={name:nm,start,end:r-1};
+      setRow(r,6); r++; // spacer
+    });
+
+    // ── SUMMARY ──
+    r++;
+    const sumHdr=r;
+    ['','Area','SI','NO','N.A.','Totale','% Conformita'].forEach((h,i)=>{
+      const cc=ws.getCell(r,i+1); cc.value=h; cc.font=F({bold:true,color:{argb:HEX.fg},size:9});
+      cc.fill={type:'pattern',pattern:'solid',fgColor:{argb:HEX.sumhdr}}; cc.alignment={horizontal:'center',vertical:'middle'}; cc.border=thin();
+    });
+    setRow(r,22); r++;
+    let idx=0;
+    Object.values(ranges).forEach(rg=>{
+      const bg=(idx%2===0)?HEX.sumrow:HEX.white;
+      const bgFill={type:'pattern',pattern:'solid',fgColor:{argb:bg}};
+      const s=secStatByRange(rg);
+      const set=(col,val,opt)=>{ const cc=ws.getCell(r,col); cc.value=val; cc.font=F({size:9,...(opt&&opt.font||{})});
+        cc.fill=bgFill; cc.alignment={horizontal:opt&&opt.left?'left':'center',vertical:'middle'}; cc.border=thin();
+        if(opt&&opt.fmt) cc.numFmt=opt.fmt; };
+      set(1,idx+1);
+      set(2,rg.name,{left:true});
+      set(3,{formula:`COUNTIF(C${rg.start}:C${rg.end},"SI")`,result:s.si});
+      set(4,{formula:`COUNTIF(C${rg.start}:C${rg.end},"NO")`,result:s.no});
+      set(5,{formula:`COUNTIF(C${rg.start}:C${rg.end},"N.A.")`,result:s.na});
+      set(6,{formula:`C${r}+D${r}`,result:s.si+s.no});
+      const pctRes = (s.si+s.no)>0 ? s.si/(s.si+s.no) : null;
+      const pcell=ws.getCell(r,7);
+      pcell.value = (s.si+s.no)>0 ? {formula:`IF(F${r}=0,"-",C${r}/F${r})`,result:pctRes} : {formula:`IF(F${r}=0,"-",C${r}/F${r})`,result:'-'};
+      pcell.font=F({size:9,bold:true,color:{argb: pctRes===null?'FF000000':(pctRes>=0.8?HEX.siTxt:(pctRes<0.5?HEX.noTxt:'FF8A5A00'))}});
+      pcell.fill=bgFill; pcell.alignment={horizontal:'center',vertical:'middle'}; pcell.border=thin(); pcell.numFmt='0%';
+      setRow(r,18); r++; idx++;
+    });
+    const sumEnd=r-1;
+    // GIUDIZIO
+    ws.mergeCells(`A${r}:B${r}`);
+    c=ws.getCell(`A${r}`); c.value='  GIUDIZIO COMPLESSIVO'; c.font=F({bold:true,color:{argb:HEX.fg},size:10});
+    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:HEX.sumhdr}}; c.alignment={horizontal:'left',vertical:'middle'};
+    let gSi=0,gNo=0,gNa=0; Object.values(ranges).forEach(rg=>{const s=secStatByRange(rg);gSi+=s.si;gNo+=s.no;gNa+=s.na;});
+    const gTot=gSi+gNo; const gPct=gTot>0?gSi/gTot:null;
+    const gset=(col,val,fmt,color)=>{ const cc=ws.getCell(r,col); cc.value=val; cc.font=F({bold:true,color:{argb:color||HEX.fg},size:10});
+      cc.fill={type:'pattern',pattern:'solid',fgColor:{argb:HEX.sumhdr}}; cc.alignment={horizontal:'center',vertical:'middle'}; cc.border=thin(); if(fmt)cc.numFmt=fmt; };
+    gset(3,{formula:`SUM(C${sumHdr+1}:C${sumEnd})`,result:gSi});
+    gset(4,{formula:`SUM(D${sumHdr+1}:D${sumEnd})`,result:gNo});
+    gset(5,{formula:`SUM(E${sumHdr+1}:E${sumEnd})`,result:gNa});
+    gset(6,{formula:`SUM(F${sumHdr+1}:F${sumEnd})`,result:gTot});
+    gset(7, gTot>0?{formula:`IF(F${r}=0,"-",C${r}/F${r})`,result:gPct}:{formula:`IF(F${r}=0,"-",C${r}/F${r})`,result:'-'},'0%');
+    setRow(r,25); r+=2;
+    // Legend
+    ws.mergeCells(`A${r}:G${r}`);
+    c=ws.getCell(`A${r}`);
+    c.value='Legenda:  Verde = SI (conforme)   Rosso = NO (non conforme)   % Conformita: >= 80% Ottimo | 50-79% Sufficiente | < 50% Critico';
+    c.font=F({italic:true,size:8,color:{argb:'FF595959'}}); c.alignment={horizontal:'left',vertical:'middle'};
+    setRow(r,16);
+
+    const buf=await wb.xlsx.writeBuffer();
+    const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const fn=`Audit_TOUR_${(STATE.meta.data||today()).replace(/-/g,'')}.xlsx`;
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download=fn; document.body.appendChild(a); a.click();
+    document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),4000);
+    toast('Excel generato: '+fn);
+  }catch(err){
+    console.error(err); toast('Errore nella generazione: '+err.message,true);
+  }
+}
+function secStatByRange(rg){
+  const sec=SECTIONS.find(s=> (s.area+(s.sub?(' - '+s.sub):''))===rg.name);
+  return computeSec(sec);
+}
+function fmtDate(d){ if(!d) return ''; const p=d.split('-'); return p.length===3? `${p[2]}/${p[1]}/${p[0]}` : d; }
+function today(){ const d=new Date(); return d.toISOString().slice(0,10); }
+
+/* ════════ INIT ════════ */
+load();
+if(!STATE.meta.data) STATE.meta.data=today();
+build();
+wire();
+refreshStats();
+if(!storageOK){ document.getElementById('saveTxt').textContent='memoria non disponibile in anteprima'; }
+</script>
+</body>
+</html>
