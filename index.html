@@ -361,7 +361,7 @@ function build(){
         <div class="det">
           <div><div class="dlbl">Note</div>
             <textarea data-k="${k}" data-f="note" placeholder="Annotazioni, descrizione della rilevazione…">${esc(a.note)}</textarea></div>
-          <div class="photogrp"><div class="dlbl">Foto evidenze / non conformità</div>
+          <div class="photogrp"><div class="dlbl">Evidenze Fotografiche</div>
             <div class="photos" data-photos="${k}">${photosHtml(k)}</div>
             <div class="photo-hint">Tocca “Foto” per scattare con la fotocamera o scegliere dalla galleria.</div></div>
           <div><div class="dlbl">Intervento e responsabile</div>
@@ -421,6 +421,37 @@ function compressImage(file, maxDim, quality){
     };
     reader.readAsDataURL(file);
   });
+}
+function loadImg(src){ return new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=()=>rej(new Error('img')); im.src=src; }); }
+async function compositePhotos(photoList, extra){
+  const imgs=[]; for(const p of photoList){ try{ imgs.push(await loadImg(p.data)); }catch(e){} }
+  const n=imgs.length; if(!n) return null;
+  const cols = n===1?1:2;
+  const rows = Math.ceil(n/cols);
+  const cellW=300, cellH=225, gap=6, pad=6;
+  const W = pad*2 + cols*cellW + (cols-1)*gap;
+  const H = pad*2 + rows*cellH + (rows-1)*gap;
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  const ctx=cv.getContext('2d');
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
+  imgs.forEach((im,i)=>{
+    const cI=i%cols, rI=Math.floor(i/cols);
+    const x=pad+cI*(cellW+gap), y=pad+rI*(cellH+gap);
+    ctx.fillStyle='#eef1f5'; ctx.fillRect(x,y,cellW,cellH);
+    const iw=im.naturalWidth||im.width, ih=im.naturalHeight||im.height;
+    const sc=Math.min(cellW/iw, cellH/ih);
+    const dw=iw*sc, dh=ih*sc;
+    ctx.drawImage(im, x+(cellW-dw)/2, y+(cellH-dh)/2, dw, dh);
+    ctx.strokeStyle='#c4cfdb'; ctx.lineWidth=2; ctx.strokeRect(x+1,y+1,cellW-2,cellH-2);
+    if(extra>0 && i===n-1){
+      ctx.fillStyle='rgba(15,23,34,0.72)';
+      ctx.fillRect(x, y+cellH-54, cellW, 54);
+      ctx.fillStyle='#ffffff'; ctx.font='bold 34px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('+ '+extra+' altre foto', x+cellW/2, y+cellH-27);
+      ctx.textAlign='start'; ctx.textBaseline='alphabetic';
+    }
+  });
+  return { data: cv.toDataURL('image/jpeg', 0.72), w:W, h:H };
 }
 async function handleAddPhoto(input){
   const k=input.dataset.addphoto;
@@ -618,13 +649,13 @@ async function exportExcel(){
   try{
     const wb=new ExcelJS.Workbook();
     const ws=wb.addWorksheet('Checklist Audit',{views:[{state:'frozen',ySplit:4}]});
-    ws.columns=[{width:5},{width:75},{width:12},{width:35},{width:28},{width:16},{width:12}];
+    ws.columns=[{width:5},{width:72},{width:12},{width:30},{width:30},{width:26},{width:16},{width:12}];
 
     const F=(o)=>({name:'Calibri',...o});
     function setRow(rowIdx,h){ ws.getRow(rowIdx).height=h; }
 
     // ROW 1 title
-    ws.mergeCells('A1:G1');
+    ws.mergeCells('A1:H1');
     let c=ws.getCell('A1'); c.value='AUDIT INTERNO - Standard TOUR';
     c.font=F({bold:true,color:{argb:HEX.fg},size:14}); c.fill={type:'pattern',pattern:'solid',fgColor:{argb:HEX.title}};
     c.alignment={horizontal:'center',vertical:'middle'}; setRow(1,30);
@@ -633,37 +664,38 @@ async function exportExcel(){
     c=ws.getCell('A2'); c.value='MACRO - AREE MAGAZZINO MP - DOSATURA - PRODUZIONE - LABORATORIO';
     c.font=F({bold:true,color:{argb:HEX.fg},size:10}); c.fill={type:'pattern',pattern:'solid',fgColor:{argb:HEX.title}};
     c.alignment={horizontal:'center',vertical:'middle'};
-    ws.mergeCells('F2:G2'); c=ws.getCell('F2'); c.value='M 8.2-04 | Rev. 05 | 04/05/2026';
+    ws.mergeCells('F2:H2'); c=ws.getCell('F2'); c.value='M 8.2-04 | Rev. 05 | 04/05/2026';
     c.font=F({color:{argb:HEX.fg},size:9}); c.fill={type:'pattern',pattern:'solid',fgColor:{argb:HEX.title}};
     c.alignment={horizontal:'right',vertical:'middle'}; setRow(2,22);
     // ROW 3 meta
     c=ws.getCell('A3'); c.value='Data:'; c.font=F({bold:true,size:10});
     ws.mergeCells('B3:C3'); c=ws.getCell('B3'); c.value=fmtDate(STATE.meta.data); c.font=F({size:10}); c.border={bottom:{style:'thin'}};
     c=ws.getCell('D3'); c.value='Valutatore:'; c.font=F({bold:true,size:10});
-    ws.mergeCells('E3:G3'); c=ws.getCell('E3'); c.value=STATE.meta.valutatore||''; c.font=F({size:10}); c.border={bottom:{style:'thin'}};
+    ws.mergeCells('E3:H3'); c=ws.getCell('E3'); c.value=STATE.meta.valutatore||''; c.font=F({size:10}); c.border={bottom:{style:'thin'}};
     setRow(3,22);
     // ROW 4 headers
-    const heads=['N°','Domanda / Verifica','Risposta','Note / Evidenze Fotografiche','Intervento e Responsabile','Data Attuazione','Status'];
+    const heads=['N°','Domanda / Verifica','Risposta','Note','Evidenze Fotografiche','Intervento e Responsabile','Data Attuazione','Status'];
     heads.forEach((h,i)=>{ const cc=ws.getCell(4,i+1); cc.value=h; cc.font=F({bold:true,color:{argb:HEX.fg},size:9});
       cc.fill={type:'pattern',pattern:'solid',fgColor:{argb:HEX.hdr}}; cc.alignment={horizontal:'center',vertical:'middle',wrapText:true}; cc.border=thin(); });
     setRow(4,28);
 
     let r=5;
     const ranges={}; // secId -> {name, start, end}
-    SECTIONS.forEach(sec=>{
+    for(const sec of SECTIONS){
       // area header
       ws.mergeCells(`A${r}:B${r}`);
       const nm = sec.area + (sec.sub? (' - '+sec.sub):'');
       c=ws.getCell(`A${r}`); c.value='  '+nm; c.font=F({bold:true,color:{argb:HEX.fg},size:10});
       c.fill={type:'pattern',pattern:'solid',fgColor:{argb:HEX.area}}; c.alignment={horizontal:'left',vertical:'middle'};
-      ws.mergeCells(`C${r}:G${r}`);
+      ws.mergeCells(`C${r}:H${r}`);
       c=ws.getCell(`C${r}`); const resp=STATE.resp[sec.id]||'';
       c.value='  RESPONSABILE PRESENTE: '+(resp||'___________________________');
       c.font=F({italic:true,color:{argb:HEX.fg},size:9}); c.fill={type:'pattern',pattern:'solid',fgColor:{argb:HEX.area}};
       c.alignment={horizontal:'left',vertical:'middle'};
       setRow(r,22); r++;
       const start=r;
-      sec.q.forEach(([n,t],i)=>{
+      for(let i=0;i<sec.q.length;i++){
+        const [n,t]=sec.q[i];
         const a=STATE.ans[qkey(sec.id,n)]||{};
         const photos=(a.photos||[]);
         const nPh=photos.length;
@@ -682,39 +714,45 @@ async function exportExcel(){
         const af=ansFill(a.answer); c.fill= af||bgFill;
         c.alignment={horizontal:'center',vertical:va}; c.border=thin();
         c.dataValidation={type:'list',allowBlank:true,formulae:['"SI,NO,N.A."']};
-        // Note (con eventuale marker se piu di 4 foto)
-        let noteVal=a.note||'';
-        if(nPh>4){ noteVal=(noteVal?noteVal+'\n':'')+'(+ '+(nPh-4)+' altre foto nell\'app)'; }
-        c=ws.getCell(r,4); c.value=noteVal; c.font=F({size:9}); c.fill=bgFill;
+        // Note (colonna D)
+        c=ws.getCell(r,4); c.value=a.note||''; c.font=F({size:9}); c.fill=bgFill;
         c.alignment={horizontal:'left',vertical:va,wrapText:true}; c.border=thin();
-        // Intervento
-        c=ws.getCell(r,5); c.value=a.intervento||''; c.font=F({size:9}); c.fill=bgFill;
+        // Evidenze Fotografiche (colonna E): una sola immagine "montaggio" con tutte le foto
+        c=ws.getCell(r,5); c.value=''; c.fill=bgFill;
+        c.alignment={horizontal:'left',vertical:'top',wrapText:true}; c.border=thin();
+        // Intervento (F)
+        c=ws.getCell(r,6); c.value=a.intervento||''; c.font=F({size:9}); c.fill=bgFill;
         c.alignment={horizontal:'left',vertical:va,wrapText:true}; c.border=thin();
-        // Data
-        c=ws.getCell(r,6); c.value=fmtDate(a.data); c.font=F({size:9}); c.fill=bgFill;
+        // Data (G)
+        c=ws.getCell(r,7); c.value=fmtDate(a.data); c.font=F({size:9}); c.fill=bgFill;
         c.alignment={horizontal:'center',vertical:va}; c.border=thin();
-        // Status
-        c=ws.getCell(r,7); c.value=a.status||''; c.font=F({size:9}); c.fill=bgFill;
+        // Status (H)
+        c=ws.getCell(r,8); c.value=a.status||''; c.font=F({size:9}); c.fill=bgFill;
         c.alignment={horizontal:'center',vertical:va}; c.border=thin();
-        // Foto: striscia nella parte bassa della riga (colonne D-G), max 4 visibili
+        // Composizione foto -> singola immagine ancorata nella cella E
+        let rowH=36;
         if(nPh){
-          const TW=96, TH=72;
-          photos.slice(0,4).forEach((p,pi)=>{
-            try{
-              const b64=(p.data.split(',')[1])||p.data;
+          const CAP=6;
+          const shown=photos.slice(0,CAP);
+          const extra=Math.max(0, nPh-CAP);
+          try{
+            const mont=await compositePhotos(shown, extra);
+            if(mont){
+              const dispW=205;
+              const dispH=Math.round(dispW * mont.h / mont.w);
+              const b64=(mont.data.split(',')[1])||mont.data;
               const imgId=wb.addImage({base64:b64, extension:'jpeg'});
-              ws.addImage(imgId, { tl:{ col: 3+pi+0.04, row: (r-1)+0.34 }, ext:{ width:TW, height:TH }, editAs:'oneCell' });
-            }catch(e){ /* ignora singola foto non valida */ }
-          });
-          setRow(r, 118);
-        } else {
-          setRow(r,36);
+              ws.addImage(imgId, { tl:{ col:4.03, row:(r-1)+0.05 }, ext:{ width:dispW, height:dispH }, editAs:'oneCell' });
+              rowH = Math.max(36, (dispH+12)*3/4); // px -> punti, con margine
+            }
+          }catch(e){ /* se la composizione fallisce, lascia la cella vuota */ }
         }
+        setRow(r, rowH);
         r++;
-      });
+      }
       ranges[sec.id]={name:nm,start,end:r-1};
       setRow(r,6); r++; // spacer
-    });
+    }
 
     // ── SUMMARY ──
     r++;
