@@ -133,8 +133,10 @@ header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#16202
   font-family:'Saira Condensed';font-weight:700;font-size:20px;color:#fff;letter-spacing:.5px}
 .co-badge.ever{background:linear-gradient(135deg,#2bbf6c,#1f8c50)}
 .co-badge.vig{background:linear-gradient(135deg,#4a90d9,#2c63b0)}
+.co-badge.cm{background:linear-gradient(135deg,#b06ad0,#7d3fb0)}
+.co-badge.cm3{background:linear-gradient(135deg,#e07a3f,#c25618)}
 .co-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
-.co-meta .co-t{font-family:'Saira Condensed';font-weight:700;font-size:21px;letter-spacing:.3px;line-height:1}
+.co-meta .co-t{font-family:'Saira Condensed';font-weight:700;font-size:21px;letter-spacing:.3px;line-height:1;color:var(--accent)}
 .co-meta .co-d{font-size:11.5px;color:var(--muted);line-height:1.35}
 .co-meta .co-draft{font-size:11px;color:var(--accent);font-weight:600;margin-top:3px;display:none}
 .co-meta .co-draft.show{display:block}
@@ -235,6 +237,16 @@ header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#16202
       <button class="co-card" data-co="vig">
         <span class="co-badge vig">VI</span>
         <span class="co-meta"><span class="co-t">VIG</span><span class="co-d">Aree VIG · Calandra, Taglio, GK50, Dosatura, Infrastrutture</span><span class="co-draft" data-draft="vig"></span></span>
+        <svg class="co-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+      <button class="co-card" data-co="cm">
+        <span class="co-badge cm">CM</span>
+        <span class="co-meta"><span class="co-t">CM</span><span class="co-d">Aree CM · Magazzino, Camera Calda, Dosatura, Produzione, Laboratorio, Sage</span><span class="co-draft" data-draft="cm"></span></span>
+        <svg class="co-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+      <button class="co-card" data-co="cm3">
+        <span class="co-badge cm3">C3</span>
+        <span class="co-meta"><span class="co-t">CM3</span><span class="co-d">Aree CM3 · Magazzini, Camera Fredda, Estrusione, Spedizione, Mescole NC</span><span class="co-draft" data-draft="cm3"></span></span>
         <svg class="co-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m9 18 6-6-6-6"/></svg>
       </button>
     </div>
@@ -394,6 +406,74 @@ const VIG_SECTIONS = [
     [17,"Le infrastrutture (muri, finestre, porte e pavimenti) sono integre e pulite?"]]},
 ];
 
+const CM_SECTIONS = [
+  {id:"cm_mag", area:"MAGAZZINO", sub:"B · D · Ex Camera Calda · Esterno", q:[
+    [1,"Viene rispettato e mantenuto ordine e pulizia per evitare possibili inquinamenti?"],
+    [2,"Le materie prime presentano il cartellino identificativo QRcode?"],
+    [3,"Viene rispettata la gestione FIFO dei materiali?"],
+    [4,"Le rimanenze dei prodotti parzialmente dosati conservano la loro identificazione QR code?"]]},
+  {id:"cm_est", area:"AREA ESTERNA CM - DEPOSITO LUBRIFICANTI", sub:"", q:[
+    [5,"Viene rispettato e mantenuto ordine e pulizia per evitare possibili inquinamenti?"],
+    [6,"Viene rispettata la gestione FIFO dei materiali?"]]},
+  {id:"cm_camera", area:"CAMERA CALDA CM", sub:"", q:[
+    [7,"Viene rispettato e mantenuto ordine e pulizia per evitare possibili inquinamenti?"],
+    [8,"Vengono costantemente alimentati i polimeri destinati alla camera calda rispettandone la rotazione settimanale prima del prelievo per la produzione?"]]},
+  {id:"cm_dosatura", area:"DOSATURA GOMMA CM (COSTRUCTA)", sub:"", q:[
+    [9,"Viene rispettato e mantenuto ordine e pulizia per evitare possibili inquinamenti?"],
+    [10,"Viene utilizzata la pistola QRcode per la lettura dei bancali di polimero prelevati per predisporre le pesate previste dalla ricetta visualizzata al terminale?"],
+    [11,"Vengono dosati i polimeri rispettando le tolleranze previste dalla ricetta visualizzate nel terminale?"]]},
+  {id:"cm_prod", area:"PRODUZIONE", sub:"GK250 CM", q:[
+    [12,"Vengono controllate le pesate delle materie prime per mezzo della pistola ottica e del nastro pesatore?"],
+    [13,"Gli ingredienti predosati presenti in plancia sono preparati in modo adeguato in contenitori puliti al by? Hanno tutti il cartellino identificativo Qrcode?"],
+    [14,"Viene compilato il modulo della tracciabilità recuperi inseriti al by o al mescolatore aperto?"],
+    [15,"Piatto mescolatore, spalle e blender dei mescolatori aperti sono puliti ed esenti da residui di gomma che possano inquinare la mescola in produzione?"],
+    [16,"Al mescolatore aperto (specificare quale/i) vengono rispettate le specifiche di lavorazione presenti nel programma di produzione giornaliero?"],
+    [17,"Batch off – fine linea; sono rispettate le specifiche di imballo previste dal programma di produzione?"],
+    [18,"Ordine e pulizia vengono rispettati?"]]},
+  {id:"cm_lab", area:"LABORATORIO CQ", sub:"", q:[
+    [19,"Ordine e pulizia vengono rispettati?"],
+    [20,"Il piano di controllo previsto per le mescole in produzione viene rispettato?"],
+    [21,"In caso di mescola non conforme viene identificata con il modulo previsto e isolata in area NC? Viene bloccata in blending per impedirne il prelievo improprio?"]]},
+  {id:"cm_sped", area:"SPEDIZIONE MESCOLE", sub:"Magazzino Refrigerato", q:[
+    [22,"Ordine e pulizia vengono rispettati?"],
+    [23,"I bancali contenenti le mescole in spedizione sono integri?"],
+    [24,"Sono presenti mescole pronte per la spedizione con data di produzione non antecedente di una settimana?"]]},
+  {id:"cm_nc", area:"MATERIALI NON CONFORMI", sub:"", q:[
+    [25,"I bancali di mescole non conformi sono isolati nell'area NC?"],
+    [26,"Le mescole identificate come non conformi hanno il modulo identificativo per il trattamento della non conformità?"]]},
+  {id:"cm_sage", area:"LINEA SAGE", sub:"", q:[
+    [27,"Vengono controllate le mescole da trafila per mezzo della pistola ottica?"],
+    [28,"Piatto mescolatori, spalle e blender dei mescolatori aperti sono puliti ed esenti da residui di gomma che possano inquinare la mescola in produzione?"],
+    [29,"Batch off – fine linea; sono rispettate le specifiche di imballo previste dal programma di produzione?"],
+    [30,"Ordine e pulizia vengono rispettati?"]]},
+];
+
+const CM3_SECTIONS = [
+  {id:"cm3_mag", area:"MAGAZZINI", sub:"", q:[
+    [1,"Viene rispettato e mantenuto ordine e pulizia per evitare possibili inquinamenti?"],
+    [2,"I bancali presentano il cartellino identificativo?"]]},
+  {id:"cm3_fredda", area:"CAMERA FREDDA", sub:"", q:[
+    [4,"Viene rispettato e mantenuto ordine e pulizia per evitare possibili inquinamenti?"],
+    [5,"I materiali stoccati sono opportunamente identificati?"]]},
+  {id:"cm3_estr", area:"ESTRUSIONE", sub:"Trafila: __________", q:[
+    [6,"Vengono controllati e sparati i bancali in input per mezzo di pistola ottica?"],
+    [7,"I parametri di processo sono conformi a quanto previsto da programma?"],
+    [8,"Vengono prelevati i campioni ed effettuata la curva reometrica?"],
+    [9,"Il livello di soluzione antiadesivo/talco è quello atteso?"],
+    [10,"Ove previsto, viene fatto il trafilino?"],
+    [11,"Fine linea: sono rispettate le specifiche di imballo previste dal programma?"],
+    [12,"Fine linea: vengono pesati e etichettati tutti i bancali?"],
+    [13,"Vengono messi da parte i filtri? In caso di anomalie, sono state segnalate al capoturno?"],
+    [14,"Viene rispettato e mantenuto ordine e pulizia per evitare possibili inquinamenti?"]]},
+  {id:"cm3_sped", area:"SPEDIZIONE MESCOLE", sub:"", q:[
+    [15,"Ordine e pulizia vengono rispettati?"],
+    [16,"I bancali contenenti le mescole in spedizione sono integri?"],
+    [17,"Sono presenti solo mescole pronte per la spedizione con data di produzione non antecedente a una settimana?"]]},
+  {id:"cm3_nc", area:"MESCOLE NON CONFORMI", sub:"", q:[
+    [18,"I bancali di mescole non conformi sono isolati nell'area NC o nei drive inn dedicati?"],
+    [19,"Le mescole identificate come non conformi sono state segnalate alla qualità e bloccate in Blending?"]]},
+];
+
 const COMPANIES = {
   ever: { id:"ever", name:"Ever", sections:EVER_SECTIONS,
     sub:"Standard TOUR · Evercompounds S.p.A.",
@@ -401,14 +481,28 @@ const COMPANIES = {
     xlsTitle:"AUDIT INTERNO - Standard TOUR",
     xlsSub:"MACRO - AREE MAGAZZINO MP - DOSATURA - PRODUZIONE - LABORATORIO",
     xlsMeta:"M 8.2-04 | Rev. 05 | 04/05/2026",
-    filePrefix:"Audit_TOUR_Ever" },
+    filePrefix:"Audit_TOUR_Ever", badge:"EV" },
   vig: { id:"vig", name:"VIG", sections:VIG_SECTIONS,
     sub:"Standard TOUR · Aree VIG",
     sheet:"Checklist VIG",
     xlsTitle:"AUDIT INTERNO - Standard TOUR",
     xlsSub:"MACRO - AREE VIG",
     xlsMeta:"M 8.2-04 | Rev. 04 | 04/06/2026",
-    filePrefix:"Audit_TOUR_VIG" },
+    filePrefix:"Audit_TOUR_VIG", badge:"VI" },
+  cm: { id:"cm", name:"CM", sections:CM_SECTIONS,
+    sub:"Standard TOUR · Aree CM",
+    sheet:"Checklist CM",
+    xlsTitle:"AUDIT INTERNO - Standard TOUR",
+    xlsSub:"MACRO - AREE CM",
+    xlsMeta:"M 8.2-04 | Rev. 02 | 29/01/2019",
+    filePrefix:"Audit_TOUR_CM", badge:"CM" },
+  cm3: { id:"cm3", name:"CM3", sections:CM3_SECTIONS,
+    sub:"Standard TOUR · Aree CM3",
+    sheet:"Checklist CM3",
+    xlsTitle:"AUDIT INTERNO - Standard TOUR",
+    xlsSub:"MACRO - AREE CM3",
+    xlsMeta:"M 8.2-04 | Rev. 02 | 29/01/2019",
+    filePrefix:"Audit_TOUR_CM3", badge:"C3" },
 };
 
 let CO=null;            // azienda corrente
@@ -673,7 +767,7 @@ function selectCompany(id){
   // header
   document.getElementById('brandSub').textContent = CO.sub;
   document.getElementById('coChipName').textContent = CO.name;
-  document.getElementById('coLogo').textContent = (id==='vig'?'VI':'EV');
+  document.getElementById('coLogo').textContent = CO.badge||'AI';
   if(!storageOK){ document.getElementById('saveTxt').textContent='memoria non disponibile in anteprima'; }
   else { document.getElementById('saveTxt').textContent='salvataggio automatico sul dispositivo'; }
   applyMeta();
