@@ -114,6 +114,38 @@ header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#16202
 .det .dlbl{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600;margin-bottom:-4px}
 .det select:focus,.det input:focus,.det textarea:focus{outline:none;border-color:var(--accent)}
 
+/* ── COMPANY PICKER ── */
+.picker{position:fixed;inset:0;z-index:200;background:radial-gradient(120% 90% at 50% 0%,#1b2a3c 0%,#0f1722 60%);
+  display:flex;align-items:center;justify-content:center;padding:24px 18px;overflow-y:auto}
+.picker.hide{display:none}
+.picker-inner{width:100%;max-width:460px;text-align:center;padding:24px 0}
+.picker-logo{width:62px;height:62px;border-radius:16px;margin:0 auto 16px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--accent),var(--accent-d));color:#16202e;
+  font-family:'Saira Condensed';font-weight:700;font-size:32px;box-shadow:0 6px 22px rgba(246,168,35,.3)}
+.picker-title{font-family:'Saira Condensed';font-weight:700;font-size:30px;letter-spacing:.5px}
+.picker-sub{color:var(--muted);font-size:13px;margin:6px 0 26px;line-height:1.45;padding:0 10px}
+.co-list{display:flex;flex-direction:column;gap:13px}
+.co-card{display:flex;align-items:center;gap:14px;text-align:left;background:var(--card);border:1px solid var(--line);
+  border-radius:16px;padding:16px 15px;cursor:pointer;transition:transform .12s,border-color .2s,background .2s}
+.co-card:active{transform:scale(.98)}
+.co-card:hover{border-color:var(--accent)}
+.co-badge{width:50px;height:50px;border-radius:13px;flex:none;display:grid;place-items:center;
+  font-family:'Saira Condensed';font-weight:700;font-size:20px;color:#fff;letter-spacing:.5px}
+.co-badge.ever{background:linear-gradient(135deg,#2bbf6c,#1f8c50)}
+.co-badge.vig{background:linear-gradient(135deg,#4a90d9,#2c63b0)}
+.co-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.co-meta .co-t{font-family:'Saira Condensed';font-weight:700;font-size:21px;letter-spacing:.3px;line-height:1}
+.co-meta .co-d{font-size:11.5px;color:var(--muted);line-height:1.35}
+.co-meta .co-draft{font-size:11px;color:var(--accent);font-weight:600;margin-top:3px;display:none}
+.co-meta .co-draft.show{display:block}
+.co-arrow{width:22px;height:22px;color:var(--muted);flex:none}
+.picker-foot{color:var(--muted);font-size:10.5px;margin-top:22px;line-height:1.5;padding:0 6px}
+/* company chip in header */
+.co-chip{flex:none;display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);
+  color:var(--ink);border-radius:999px;padding:7px 12px;font-family:'Saira Condensed';font-weight:700;font-size:14px;
+  letter-spacing:.4px;cursor:pointer;transition:transform .12s}
+.co-chip:active{transform:scale(.95)}
+.co-chip svg{width:15px;height:15px;color:var(--muted)}
 /* ── PHOTOS ── */
 .det .photogrp{display:flex;flex-direction:column;gap:7px}
 .photos{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
@@ -189,13 +221,38 @@ header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#16202
 </head>
 <body>
 
+<div class="picker" id="picker">
+  <div class="picker-inner">
+    <div class="picker-logo">AI</div>
+    <h1 class="picker-title">Audit Interno</h1>
+    <p class="picker-sub">Standard TOUR · seleziona lo stabilimento da sottoporre ad audit</p>
+    <div class="co-list">
+      <button class="co-card" data-co="ever">
+        <span class="co-badge ever">EV</span>
+        <span class="co-meta"><span class="co-t">Ever</span><span class="co-d">Evercompounds · Magazzini, Dosatura, Produzione, Laboratorio</span><span class="co-draft" data-draft="ever"></span></span>
+        <svg class="co-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+      <button class="co-card" data-co="vig">
+        <span class="co-badge vig">VI</span>
+        <span class="co-meta"><span class="co-t">VIG</span><span class="co-d">Aree VIG · Calandra, Taglio, GK50, Dosatura, Infrastrutture</span><span class="co-draft" data-draft="vig"></span></span>
+        <svg class="co-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+    </div>
+    <p class="picker-foot">Ogni stabilimento ha il proprio modulo e il proprio Excel. I dati restano salvati separatamente sul dispositivo.</p>
+  </div>
+</div>
+
 <header>
   <div class="brand">
-    <div class="logo">AI</div>
-    <div>
+    <div class="logo" id="coLogo">AI</div>
+    <div style="flex:1;min-width:0">
       <h1>AUDIT INTERNO</h1>
-      <p>Standard TOUR · M 8.2-04 · Rev. 05</p>
+      <p id="brandSub">Standard TOUR</p>
     </div>
+    <button class="co-chip" id="coChip" title="Cambia azienda">
+      <span id="coChipName">—</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>
+    </button>
   </div>
   <div class="prog-wrap">
     <div class="prog-track"><div class="prog-bar" id="progBar"></div></div>
@@ -264,7 +321,7 @@ const PROD_Q = [
   [22,"Batch off – fine linea; sono rispettate le specifiche di imballo previste dal programma di produzione?"],
   [23,"Ordine e pulizia vengono rispettati?"],
 ];
-const SECTIONS = [
+const EVER_SECTIONS = [
   {id:"mag_trad", area:"MAGAZZINO", sub:"Tradizionale", q:MAG_Q},
   {id:"mag_dayco",area:"MAGAZZINO", sub:"Dayco",        q:MAG_Q},
   {id:"mag_vers", area:"MAGAZZINO", sub:"Versalis",     q:MAG_Q},
@@ -309,19 +366,69 @@ const SECTIONS = [
     [33,"I bancali di mescole non conformi sono isolati nell'area NC o nei drive inn dedicati?"],
     [34,"Le mescole identificate come non conformi hanno il modulo identificativo per il trattamento della non conformità?"]]},
 ];
+
+const VIG_SECTIONS = [
+  {id:"ingresso", area:"INGRESSO VIG", sub:"", q:[
+    [1,"Viene rispettato e mantenuto ordine e pulizia per evitare possibili inquinamenti?"]]},
+  {id:"imballi", area:"ZONA DEDICATA AD IMBALLI CALANDRA E TAGLIERINA", sub:"", q:[
+    [2,"Viene rispettato e mantenuto ordine e pulizia per evitare possibili inquinamenti?"]]},
+  {id:"calandra", area:"CALANDRA", sub:"", q:[
+    [3,"Viene rispettato e mantenuto ordine e pulizia per evitare possibili inquinamenti?"],
+    [4,"Viene rispettata la gestione FIFO dei materiali?"],
+    [5,"Vengono compilati i moduli di produzione e check list di setup?"],
+    [6,"Viene utilizzata la pistola QR CODE per lettura odp?"],
+    [7,"L'area dedicata a rimanenze e resi e in ordine?"],
+    [8,"L'area \"calandrati\" in spedizione e in ordine?"]]},
+  {id:"taglio", area:"TAGLIO", sub:"", q:[
+    [10,"Viene rispettato e mantenuto ordine e pulizia per evitare possibili inquinamenti?"]]},
+  {id:"gk50", area:"GK50 VIG", sub:"", q:[
+    [11,"Ordine e pulizia vengono rispettati?"],
+    [12,"Vengono controllate le pesate delle MP per mezzo della bilancia?"],
+    [13,"In plancia le MP sono identificate?"],
+    [14,"Al mescolatore aperto e al batchoff vengono rispettate le specifiche di produzione e confezionamento del programma"]]},
+  {id:"dosatura", area:"DOSATURA MANUALE", sub:"", q:[
+    [15,"Ordine e pulizia vengono rispettati?"],
+    [16,"Le materie prime stoccate presentano cartellino?"],
+    [17,"Il dosatore rispettava la ricetta da dosare come tipologia di prodotto previsto"]]},
+  {id:"infra", area:"INFRASTRUTTURE", sub:"", q:[
+    [17,"Le infrastrutture (muri, finestre, porte e pavimenti) sono integre e pulite?"]]},
+];
+
+const COMPANIES = {
+  ever: { id:"ever", name:"Ever", sections:EVER_SECTIONS,
+    sub:"Standard TOUR · Evercompounds S.p.A.",
+    sheet:"Checklist Audit",
+    xlsTitle:"AUDIT INTERNO - Standard TOUR",
+    xlsSub:"MACRO - AREE MAGAZZINO MP - DOSATURA - PRODUZIONE - LABORATORIO",
+    xlsMeta:"M 8.2-04 | Rev. 05 | 04/05/2026",
+    filePrefix:"Audit_TOUR_Ever" },
+  vig: { id:"vig", name:"VIG", sections:VIG_SECTIONS,
+    sub:"Standard TOUR · Aree VIG",
+    sheet:"Checklist VIG",
+    xlsTitle:"AUDIT INTERNO - Standard TOUR",
+    xlsSub:"MACRO - AREE VIG",
+    xlsMeta:"M 8.2-04 | Rev. 04 | 04/06/2026",
+    filePrefix:"Audit_TOUR_VIG" },
+};
+
+let CO=null;            // azienda corrente
+let SECTIONS=[];        // sezioni dell'azienda corrente
+let TOTAL_Q=0;
+
 const STATUS_OPTS = ["", "Aperto", "In corso", "Chiuso"];
 
 /* ════════ STATE + STORAGE ════════ */
-const SKEY = "audit_tour_v1";
 let STATE = { meta:{data:"", valutatore:""}, resp:{}, ans:{} };
 let storageOK = true;
+function skey(){ return "audit_tour_"+(CO?CO.id:"none")+"_v1"; }
 function load(){
-  try{ const raw = localStorage.getItem(SKEY); if(raw) STATE = JSON.parse(raw); }
+  STATE = { meta:{data:"", valutatore:""}, resp:{}, ans:{} };
+  try{ const raw = localStorage.getItem(skey()); if(raw) STATE = JSON.parse(raw); }
   catch(e){ storageOK=false; }
 }
 let quotaWarned=false;
 function save(){
-  try{ localStorage.setItem(SKEY, JSON.stringify(STATE)); return true; }
+  try{ localStorage.setItem(skey(), JSON.stringify(STATE)); return true; }
   catch(e){
     const quota = e && (e.name==='QuotaExceededError' || /quota/i.test(e.name||e.message||''));
     if(quota){
@@ -336,7 +443,6 @@ function save(){
 function qkey(sec, n){ return sec+"#"+n; }
 
 /* ════════ RENDER ════════ */
-const TOTAL_Q = SECTIONS.reduce((a,s)=>a+s.q.length,0);
 function build(){
   const root = document.getElementById('sections');
   SECTIONS.forEach((sec, si)=>{
@@ -481,9 +587,11 @@ function deletePhoto(k, pi){
 }
 
 /* ════════ INTERACTIONS ════════ */
-function wire(){
+function applyMeta(){
   document.getElementById('metaData').value = STATE.meta.data||'';
   document.getElementById('metaValutatore').value = STATE.meta.valutatore||'';
+}
+function wireGlobal(){
   document.getElementById('metaData').addEventListener('change',e=>{STATE.meta.data=e.target.value;save();});
   document.getElementById('metaValutatore').addEventListener('input',e=>{STATE.meta.valutatore=e.target.value;save();});
 
@@ -529,6 +637,50 @@ function wire(){
   document.getElementById('sheetX').addEventListener('click',closeStats);
   document.getElementById('scrim').addEventListener('click',e=>{ if(e.target.id==='scrim') closeStats(); });
   document.getElementById('btnXls').addEventListener('click',exportExcel);
+
+  // Company picker
+  document.querySelectorAll('.co-card').forEach(btn=>{
+    btn.addEventListener('click',()=>selectCompany(btn.dataset.co));
+  });
+  document.getElementById('coChip').addEventListener('click',openPicker);
+  document.getElementById('coLogo').addEventListener('click',openPicker);
+}
+
+function refreshDrafts(){
+  Object.keys(COMPANIES).forEach(id=>{
+    const el=document.querySelector(`.co-draft[data-draft="${id}"]`);
+    if(!el) return;
+    let n=0,tot=0;
+    try{
+      const raw=localStorage.getItem("audit_tour_"+id+"_v1");
+      tot=COMPANIES[id].sections.reduce((a,sx)=>a+sx.q.length,0);
+      if(raw){ const st=JSON.parse(raw); n=Object.values(st.ans||{}).filter(a=>a&&a.answer).length; }
+    }catch(e){}
+    if(n>0){ el.textContent='Bozza in corso · '+n+'/'+tot+' compilate'; el.classList.add('show'); }
+    else { el.textContent=''; el.classList.remove('show'); }
+  });
+}
+function openPicker(){
+  refreshDrafts();
+  document.getElementById('picker').classList.remove('hide');
+}
+function selectCompany(id){
+  CO = COMPANIES[id];
+  SECTIONS = CO.sections;
+  TOTAL_Q = SECTIONS.reduce((a,sx)=>a+sx.q.length,0);
+  load();
+  if(!STATE.meta.data) STATE.meta.data=today();
+  // header
+  document.getElementById('brandSub').textContent = CO.sub;
+  document.getElementById('coChipName').textContent = CO.name;
+  document.getElementById('coLogo').textContent = (id==='vig'?'VI':'EV');
+  if(!storageOK){ document.getElementById('saveTxt').textContent='memoria non disponibile in anteprima'; }
+  else { document.getElementById('saveTxt').textContent='salvataggio automatico sul dispositivo'; }
+  applyMeta();
+  build();
+  refreshStats();
+  document.getElementById('picker').classList.add('hide');
+  window.scrollTo(0,0);
 }
 
 /* ════════ STATS ════════ */
@@ -648,7 +800,7 @@ async function exportExcel(){
   toast('Genero il file…');
   try{
     const wb=new ExcelJS.Workbook();
-    const ws=wb.addWorksheet('Checklist Audit',{views:[{state:'frozen',ySplit:4}]});
+    const ws=wb.addWorksheet(CO.sheet,{views:[{state:'frozen',ySplit:4}]});
     ws.columns=[{width:5},{width:72},{width:12},{width:30},{width:30},{width:26},{width:16},{width:12}];
 
     const F=(o)=>({name:'Calibri',...o});
@@ -656,15 +808,15 @@ async function exportExcel(){
 
     // ROW 1 title
     ws.mergeCells('A1:H1');
-    let c=ws.getCell('A1'); c.value='AUDIT INTERNO - Standard TOUR';
+    let c=ws.getCell('A1'); c.value=CO.xlsTitle;
     c.font=F({bold:true,color:{argb:HEX.fg},size:14}); c.fill={type:'pattern',pattern:'solid',fgColor:{argb:HEX.title}};
     c.alignment={horizontal:'center',vertical:'middle'}; setRow(1,30);
     // ROW 2 subtitle
     ws.mergeCells('A2:E2');
-    c=ws.getCell('A2'); c.value='MACRO - AREE MAGAZZINO MP - DOSATURA - PRODUZIONE - LABORATORIO';
+    c=ws.getCell('A2'); c.value=CO.xlsSub;
     c.font=F({bold:true,color:{argb:HEX.fg},size:10}); c.fill={type:'pattern',pattern:'solid',fgColor:{argb:HEX.title}};
     c.alignment={horizontal:'center',vertical:'middle'};
-    ws.mergeCells('F2:H2'); c=ws.getCell('F2'); c.value='M 8.2-04 | Rev. 05 | 04/05/2026';
+    ws.mergeCells('F2:H2'); c=ws.getCell('F2'); c.value=CO.xlsMeta;
     c.font=F({color:{argb:HEX.fg},size:9}); c.fill={type:'pattern',pattern:'solid',fgColor:{argb:HEX.title}};
     c.alignment={horizontal:'right',vertical:'middle'}; setRow(2,22);
     // ROW 3 meta
@@ -807,7 +959,7 @@ async function exportExcel(){
 
     const buf=await wb.xlsx.writeBuffer();
     const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-    const fn=`Audit_TOUR_${(STATE.meta.data||today()).replace(/-/g,'')}.xlsx`;
+    const fn=`${CO.filePrefix}_${(STATE.meta.data||today()).replace(/-/g,'')}.xlsx`;
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a'); a.href=url; a.download=fn; document.body.appendChild(a); a.click();
     document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),4000);
@@ -824,12 +976,10 @@ function fmtDate(d){ if(!d) return ''; const p=d.split('-'); return p.length===3
 function today(){ const d=new Date(); return d.toISOString().slice(0,10); }
 
 /* ════════ INIT ════════ */
-load();
-if(!STATE.meta.data) STATE.meta.data=today();
-build();
-wire();
-refreshStats();
-if(!storageOK){ document.getElementById('saveTxt').textContent='memoria non disponibile in anteprima'; }
+// prova storage una volta
+try{ localStorage.setItem('__t','1'); localStorage.removeItem('__t'); }catch(e){ storageOK=false; }
+wireGlobal();
+openPicker();   // mostra la scelta azienda all'avvio
 </script>
 </body>
 </html>
